@@ -19,7 +19,7 @@ class KakaoDataException(Exception):
     pass
 
 #카카오 액세스 토큰 교환 함수
-def exchange_kakao_access_token(access_code): 
+def exchange_kakao_access_token(code): 
     response = requests.post(
         'https://kauth.kakao.com/oauth/token',
         headers={
@@ -29,7 +29,7 @@ def exchange_kakao_access_token(access_code):
             'grant_type': 'authorization_code',
             'client_id': os.environ.get('KAKAO_REST_API_KEY'),
             'redirect_uri': os.environ.get('KAKAO_REDIRECT_URI'),
-            'code': access_code,
+            'code': code,
         },
     )
 
@@ -69,7 +69,7 @@ def kakao_login(request):
     data = serializer.validated_data
     
     try:
-        kakao_data = exchange_kakao_access_token(data['access_code'])
+        kakao_data = exchange_kakao_access_token(data['code'])
         nickname = extract_kakao_nickname(kakao_data)
     except KakaoAccessTokenException:
         return Response({'detail' : 'Access token 교환에 실패했습니다.'}, status = 401)
@@ -105,7 +105,7 @@ def kakao_register(request):
     data = serializer.validated_data
     
     try:
-        kakao_data = exchange_kakao_access_token(data['access_code'])
+        kakao_data = exchange_kakao_access_token(data['code'])
         nickname = extract_kakao_nickname(kakao_data)
     except KakaoAccessTokenException:
         return Response({'detail': 'Access token 교환에 실패했습니다.'}, status=401)
